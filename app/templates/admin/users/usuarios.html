@@ -2,82 +2,239 @@
 {% block title %}Gestión de Usuarios - RopaStore{% endblock %}
 
 {% block content %}
-<div class="container py-4">
+<div class="container-fluid py-4">
 
-  <!-- ENCABEZADO -->
-  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold text-dark mb-3 mb-md-0">
-      <i class="bi bi-people-fill text-primary"></i> Gestión de Usuarios
-    </h2>
-    <a href="{{ url_for('admin.nuevo_usuario') }}" class="btn btn-primary px-3 rounded-pill shadow-sm">
-      <i class="bi bi-person-plus"></i> Nuevo Usuario
-    </a>
+  <!-- ENCABEZADO MEJORADO -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+        <div class="mb-3 mb-md-0">
+          <h1 class="h2 fw-bold text-dark mb-2">
+            <i class="bi bi-people-fill text-primary me-2"></i>Gestión de Usuarios
+          </h1>
+          <p class="text-muted mb-0">Administra los usuarios registrados en la plataforma</p>
+        </div>
+        <a href="{{ url_for('admin.nuevo_usuario') }}" class="btn btn-primary px-4 py-2 rounded-3 shadow-sm">
+          <i class="bi bi-person-plus me-2"></i>Nuevo Usuario
+        </a>
+      </div>
+    </div>
   </div>
 
-  <!-- BARRA DE BÚSQUEDA -->
-  <div class="input-group mb-4 shadow-sm" style="max-width: 420px;">
-    <span class="input-group-text bg-primary text-white border-0 rounded-start">
-      <i class="bi bi-search"></i>
-    </span>
-    <input type="text" id="searchInput" class="form-control border-0" placeholder="Buscar usuario o correo...">
+  <!-- ESTADÍSTICAS RÁPIDAS -->
+  <div class="row g-3 mb-4">
+    <div class="col-xl-3 col-md-6">
+      <div class="card border-0 bg-gradient-primary text-white rounded-4 shadow-sm">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h3 class="fw-bold mb-1">{{ total_usuarios }}</h3>
+              <p class="mb-0 opacity-75">Total Usuarios</p>
+            </div>
+            <div class="bg-white bg-opacity-20 rounded-3 p-3">
+              <i class="bi bi-people display-6"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+      <div class="card border-0 bg-gradient-success text-white rounded-4 shadow-sm">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h3 class="fw-bold mb-1">{{ total_admins }}</h3>
+              <p class="mb-0 opacity-75">Administradores</p>
+            </div>
+            <div class="bg-white bg-opacity-20 rounded-3 p-3">
+              <i class="bi bi-shield-check display-6"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+      <div class="card border-0 bg-gradient-warning text-white rounded-4 shadow-sm">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h3 class="fw-bold mb-1">{{ usuarios_activos }}</h3>
+              <p class="mb-0 opacity-75">Usuarios Activos</p>
+            </div>
+            <div class="bg-white bg-opacity-20 rounded-3 p-3">
+              <i class="bi bi-person-check display-6"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+      <div class="card border-0 bg-gradient-info text-white rounded-4 shadow-sm">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h3 class="fw-bold mb-1">{{ nuevos_este_mes }}</h3>
+              <p class="mb-0 opacity-75">Nuevos Este Mes</p>
+            </div>
+            <div class="bg-white bg-opacity-20 rounded-3 p-3">
+              <i class="bi bi-person-plus display-6"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- TABLA DE USUARIOS -->
+  <!-- BARRA DE HERRAMIENTAS -->
+  <div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body">
+      <div class="row g-3 align-items-center">
+        <div class="col-md-6">
+          <div class="input-group input-group-lg">
+            <span class="input-group-text bg-light border-end-0">
+              <i class="bi bi-search text-muted"></i>
+            </span>
+            <input type="text" id="searchInput" class="form-control border-start-0" 
+                   placeholder="Buscar por nombre, email...">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="d-flex gap-2 justify-content-md-end">
+            <div class="dropdown">
+              <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                <i class="bi bi-filter me-2"></i>Filtrar
+              </button>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item filter-option" data-filter="all" href="#">Todos los usuarios</a></li>
+                <li><a class="dropdown-item filter-option" data-filter="admin" href="#">Solo administradores</a></li>
+                <li><a class="dropdown-item filter-option" data-filter="user" href="#">Solo usuarios</a></li>
+                <li><a class="dropdown-item filter-option" data-filter="recent" href="#">Recientes</a></li>
+              </ul>
+            </div>
+            <button class="btn btn-outline-primary" id="exportBtn">
+              <i class="bi bi-download me-2"></i>Exportar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLA DE USUARIOS MEJORADA -->
   <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
-    <div class="card-header text-black fw-semibold">
+    <div class="card-header bg-transparent border-0 py-4">
       <div class="d-flex justify-content-between align-items-center">
-        <span><i class="bi bi-list-ul"></i> Lista de Usuarios</span>
-        <span class="badge bg-light text-dark px-3 py-2">{{ usuarios|length }} registrados</span>
+        <h5 class="fw-bold mb-0">
+          <i class="bi bi-list-ul text-primary me-2"></i>Lista de Usuarios Registrados
+        </h5>
+        <span class="badge bg-primary badge-modern px-3 py-2">
+          {{ usuarios|length }} usuario{{ 's' if usuarios|length != 1 else '' }}
+        </span>
       </div>
     </div>
 
     <div class="card-body p-0">
-      <div class="table-responsive" style="max-height: 520px; overflow-y: auto;">
+      <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
         <table class="table table-hover align-middle mb-0" id="userTable">
           <thead class="table-light sticky-top shadow-sm">
-            <tr class="text-uppercase small text-secondary">
-              <th>ID</th>
-              <th>Usuario</th>
-              <th>Email</th>
+            <tr class="text-uppercase small">
+              <th class="ps-4">Usuario</th>
+              <th>Información de Contacto</th>
               <th>Rol</th>
+              <th>Estado</th>
               <th>Fecha Registro</th>
-              <th>Acciones</th>
+              <th class="text-center pe-4">Acciones</th>
             </tr>
           </thead>
-          <tbody class="text-center">
+          <tbody>
             {% for u in usuarios %}
-            <tr>
-              <td class="text-muted">#{{ u.id }}</td>
-              <td class="fw-semibold text-dark">{{ u.username }}</td>
-              <td class="text-muted">{{ u.email }}</td>
+            <tr class="user-row" data-role="{{ 'admin' if u.is_admin else 'user' }}" 
+                data-date="{{ u.created_at.strftime('%Y-%m-%d') }}">
+              <td class="ps-4">
+                <div class="d-flex align-items-center">
+                  <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3"
+                       style="width: 40px; height: 40px;">
+                    <i class="bi bi-person text-primary"></i>
+                  </div>
+                  <div>
+                    <h6 class="fw-bold text-dark mb-0">{{ u.username }}</h6>
+                    <small class="text-muted">ID: #{{ u.id }}</small>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div>
+                  <div class="fw-semibold text-dark">{{ u.email }}</div>
+                  {% if u.telefono %}
+                  <small class="text-muted"><i class="bi bi-telephone me-1"></i>{{ u.telefono }}</small>
+                  {% else %}
+                  <small class="text-muted"><i class="bi bi-telephone me-1"></i>No registrado</small>
+                  {% endif %}
+                </div>
+              </td>
               <td>
                 {% if u.is_admin %}
-                  <span class="badge bg-gradient bg-danger text-light px-3 py-2">Administrador</span>
+                  <span class="badge bg-gradient-danger text-white px-3 py-2 rounded-pill">
+                    <i class="bi bi-shield-check me-1"></i>Administrador
+                  </span>
                 {% else %}
-                  <span class="badge bg-gradient bg-secondary text-light px-3 py-2">Usuario</span>
+                  <span class="badge bg-gradient-secondary text-white px-3 py-2 rounded-pill">
+                    <i class="bi bi-person me-1"></i>Usuario
+                  </span>
                 {% endif %}
               </td>
-              <td>{{ u.created_at.strftime('%d/%m/%Y') }}</td>
               <td>
-                <div class="btn-group btn-group-sm" role="group">
+                {% if u.is_active %}
+                  <span class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill">
+                    <i class="bi bi-check-circle me-1"></i>Activo
+                  </span>
+                {% else %}
+                  <span class="badge bg-danger bg-opacity-10 text-danger px-3 py-2 rounded-pill">
+                    <i class="bi bi-x-circle me-1"></i>Inactivo
+                  </span>
+                {% endif %}
+              </td>
+              <td>
+                <div class="text-muted">
+                  <div>{{ u.created_at.strftime('%d/%m/%Y') }}</div>
+                  <small>{{ u.created_at.strftime('%H:%M') }}</small>
+                </div>
+              </td>
+              <td class="pe-4">
+                <div class="d-flex justify-content-center gap-2">
                   <a href="{{ url_for('admin.editar_usuario', id=u.id) }}" 
-                     class="btn btn-outline-warning rounded-circle" data-bs-toggle="tooltip" title="Editar">
-                    <i class="bi bi-pencil"></i>
+                     class="btn btn-outline-warning btn-sm rounded-3 px-3" 
+                     data-bs-toggle="tooltip" title="Editar usuario">
+                    <i class="bi bi-pencil me-1"></i>Editar
                   </a>
+                  {% if u.id != current_user.id %}
                   <form method="POST" action="{{ url_for('admin.eliminar_usuario', id=u.id) }}" class="d-inline"
-                        onsubmit="return confirm('¿Seguro que deseas eliminar este usuario?');">
-                    <button type="submit" class="btn btn-outline-danger rounded-circle" data-bs-toggle="tooltip" title="Eliminar">
-                      <i class="bi bi-trash"></i>
+                        onsubmit="return confirm('¿Estás seguro de que deseas eliminar al usuario {{ u.username }}? Esta acción no se puede deshacer.');">
+                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-3 px-3" 
+                            data-bs-toggle="tooltip" title="Eliminar usuario">
+                      <i class="bi bi-trash me-1"></i>Eliminar
                     </button>
                   </form>
+                  {% else %}
+                  <button class="btn btn-outline-secondary btn-sm rounded-3 px-3" disabled
+                          data-bs-toggle="tooltip" title="No puedes eliminarte a ti mismo">
+                    <i class="bi bi-trash me-1"></i>Eliminar
+                  </button>
+                  {% endif %}
                 </div>
               </td>
             </tr>
             {% else %}
             <tr>
-              <td colspan="6" class="text-muted py-5">
-                <i class="bi bi-person-slash fs-3"></i>
-                <p class="mt-2 mb-0">No se encontraron usuarios.</p>
+              <td colspan="6" class="text-center py-5">
+                <div class="text-muted">
+                  <i class="bi bi-person-slash display-4 mb-3"></i>
+                  <h5 class="fw-bold">No se encontraron usuarios</h5>
+                  <p class="mb-0">No hay usuarios registrados en el sistema.</p>
+                  <a href="{{ url_for('admin.nuevo_usuario') }}" class="btn btn-primary mt-3">
+                    <i class="bi bi-person-plus me-2"></i>Agregar Primer Usuario
+                  </a>
+                </div>
               </td>
             </tr>
             {% endfor %}
@@ -88,76 +245,110 @@
   </div>
 </div>
 
-<!-- SCRIPT: FILTRO DE BÚSQUEDA -->
+<!-- SCRIPTS MEJORADOS -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const input = document.getElementById('searchInput');
-  const rows = document.querySelectorAll('#userTable tbody tr');
+  const searchInput = document.getElementById('searchInput');
+  const userRows = document.querySelectorAll('.user-row');
+  let currentFilter = 'all';
 
-  input.addEventListener('keyup', () => {
-    const filter = input.value.toLowerCase();
-    rows.forEach(row => {
-      const username = row.cells[1]?.textContent.toLowerCase() || '';
-      const email = row.cells[2]?.textContent.toLowerCase() || '';
-      row.style.display = (username.includes(filter) || email.includes(filter)) ? '' : 'none';
+  // Búsqueda en tiempo real
+  searchInput.addEventListener('input', () => {
+    const filter = searchInput.value.toLowerCase();
+    filterUsers(filter, currentFilter);
+  });
+
+  // Filtros
+  document.querySelectorAll('.filter-option').forEach(option => {
+    option.addEventListener('click', (e) => {
+      e.preventDefault();
+      currentFilter = option.dataset.filter;
+      filterUsers(searchInput.value.toLowerCase(), currentFilter);
     });
   });
+
+  function filterUsers(textFilter, roleFilter) {
+    userRows.forEach(row => {
+      const username = row.cells[0]?.textContent.toLowerCase() || '';
+      const email = row.cells[1]?.textContent.toLowerCase() || '';
+      const role = row.dataset.role;
+      const date = row.dataset.date;
+      
+      const textMatch = username.includes(textFilter) || email.includes(textFilter);
+      let roleMatch = true;
+      
+      switch(roleFilter) {
+        case 'admin': roleMatch = role === 'admin'; break;
+        case 'user': roleMatch = role === 'user'; break;
+        case 'recent': 
+          const rowDate = new Date(date);
+          const monthAgo = new Date();
+          monthAgo.setMonth(monthAgo.getMonth() - 1);
+          roleMatch = rowDate >= monthAgo;
+          break;
+      }
+      
+      row.style.display = (textMatch && roleMatch) ? '' : 'none';
+    });
+  }
 
   // Tooltips
   const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
   tooltips.forEach(t => new bootstrap.Tooltip(t));
+
+  // Exportar (simulado)
+  document.getElementById('exportBtn').addEventListener('click', () => {
+    // Aquí iría la lógica de exportación
+    alert('Funcionalidad de exportación en desarrollo');
+  });
 });
 </script>
 
-<!-- ESTILOS -->
 <style>
-  h2 i { margin-right: 8px; }
+  .bg-gradient-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+  .bg-gradient-success { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
+  .bg-gradient-warning { background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); }
+  .bg-gradient-info { background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%); }
+  .bg-gradient-danger { background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%); }
 
   .table-hover tbody tr {
     transition: all 0.25s ease;
+    border-left: 3px solid transparent;
   }
 
   .table-hover tbody tr:hover {
-    background-color: #e4e8ed;
-    transform: scale(1.005);
+    background-color: #f8f9fa;
+    border-left-color: #667eea;
+    transform: translateX(2px);
   }
 
-  .card {
-    border-radius: 1rem;
+  .user-row[data-role="admin"] {
+    background-color: rgba(220, 53, 69, 0.02);
   }
 
-  .badge {
-    font-size: 0.85rem;
-    letter-spacing: 0.3px;
-  }
-
-  .btn-outline-warning, .btn-outline-danger {
-    border-width: 2px;
-    transition: all 0.2s ease;
+  .badge-modern {
+    border-radius: 20px;
+    font-weight: 600;
   }
 
   .btn-outline-warning:hover {
-    background-color: #ffc107;
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+    border-color: #ffc107;
     color: #212529;
   }
 
   .btn-outline-danger:hover {
-    background-color: #dc3545;
-    color: #fff;
+    background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+    border-color: #dc3545;
+    color: white;
   }
 
-  #searchInput {
-    border-radius: 0 0.75rem 0.75rem 0;
-    transition: box-shadow 0.2s ease;
+  .card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
 
-  #searchInput:focus {
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-  }
-
-  thead th {
-    font-weight: 600;
-    font-size: 0.85rem;
+  .card:hover {
+    transform: translateY(-2px);
   }
 </style>
 {% endblock %}

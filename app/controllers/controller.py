@@ -19,9 +19,29 @@ usuario_cp = Blueprint('usuario_cp', __name__, template_folder=template_dir)
 producto_cp = Blueprint('producto_cp', __name__, template_folder=template_dir)
 admin_cp = Blueprint('admin', __name__, template_folder=template_dir)
 auth_cp = Blueprint('auth_cp', __name__, template_folder=template_dir)
+
+# -------------------------------
+# Rutas de inicio público
+# -------------------------------
+
 @inicio_cp.route('/inicio')
 def inicio_publico():
-    return render_template('auth/inicio.html')
+    categorias = Categoria.query.all()
+    productos_destacados = Producto.query.filter_by(destacado=True).limit(8).all()
+    productos_recientes = Producto.query.order_by(Producto.created_at.desc()).limit(8).all()
+    
+    # Estadísticas para mostrar
+    total_productos = Producto.query.count()
+    total_categorias = Categoria.query.count()
+    total_clientes = Usuario.query.filter_by(is_admin=False).count()
+    
+    return render_template('auth/inicio.html',
+                         categorias=categorias,
+                         productos_destacados=productos_destacados,
+                         productos=productos_recientes,
+                         total_productos=total_productos,
+                         total_categorias=total_categorias,
+                         total_clientes=total_clientes)
 # -------------------------------
 # autenticación
 # -------------------------------
@@ -96,16 +116,34 @@ def serve_uploaded_file(filename):
 @admin_cp.route('/dashboard')
 @login_required
 def dashboard():
-    # Redirigir si no es administrador
     if not current_user.is_admin:
         return redirect(url_for('inicio_cp.inicio_publico'))
 
-    # --- Datos principales ---
+    # Datos principales
     total_usuarios = Usuario.query.count()
     total_productos = Producto.query.count()
     total_ventas = db.session.query(func.sum(Venta.total)).scalar() or 0
+    
+    # Datos adicionales para el nuevo dashboard
+    productos_destacados = Producto.query.filter_by(destacado=True).all()
+    usuarios_activos = Usuario.query.filter_by(is_active=True).all()
+    total_categorias = Categoria.query.count()
+    
+    # Ventas del mes actual
+    from datetime import datetime
+    mes_actual = datetime.now().month
+    ventas_mes_actual = Venta.query.filter(
+        extract('month', Venta.fecha) == mes_actual
+    ).count()
+    
+    # Productos con stock bajo (menos de 10 unidades)
+    productos_bajo_stock = Producto.query.filter(Producto.stock < 10).count()
+    
+    # Ticket promedio
+    total_ventas_count = Venta.query.count()
+    ticket_promedio = total_ventas / total_ventas_count if total_ventas_count > 0 else 0
 
-    # --- Datos para gráfico (ventas por mes) ---
+    # Datos para gráfico
     ventas_por_mes = (
         db.session.query(
             extract('month', Venta.fecha).label('mes'),
@@ -116,14 +154,9 @@ def dashboard():
         .all()
     )
 
-    # Convertimos a listas para Chart.js
     meses = []
     montos = []
-
-    nombres_meses = [
-        "Ene", "Feb", "Mar", "Abr", "May", "Jun",
-        "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"
-    ]
+    nombres_meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
 
     for mes, total in ventas_por_mes:
         meses.append(nombres_meses[int(mes) - 1])
@@ -133,27 +166,51 @@ def dashboard():
         'admin/dashboard.html',
         total_usuarios=total_usuarios,
         total_productos=total_productos,
-        total_ventas=round(total_ventas, 2),
+        total_ventas=total_ventas,
+        productos_destacados=productos_destacados,
+        usuarios_activos=usuarios_activos,
+        total_categorias=total_categorias,
+        ventas_mes_actual=ventas_mes_actual,
+        productos_bajo_stock=productos_bajo_stock,
+        ticket_promedio=ticket_promedio,
         meses=meses,
-        montos=montos
+        montos=montos,
+        now=datetime.now()
     )
 @admin_cp.route('/uploads/productos/<filename>')
-def uploaded_file(filename):
-    return send_from_directory(UPLOAD_FOLDER, filename)
-
+def admin_serve_uploaded_file(filename):
+    # Ruta absoluta a la carpeta de uploads
+    uploads_dir = os.path.join(os.path.dirname(__file__), '..', 'static', 'uploads', 'productos')
+    return send_from_directory(uploads_dir, filename)
 # -------------------------------
 # Gestion de Usuarios
 # -------------------------------
 @admin_cp.route('/gestion_usuarios')
 @login_required
 def gestion_usuarios():
-    """Listado de todos los usuarios."""
     if not current_user.is_admin:
         return redirect(url_for('inicio_cp.inicio_publico'))
 
     usuarios = Usuario.query.order_by(Usuario.created_at.desc()).all()
-    return render_template('admin/users/usuarios.html', usuarios=usuarios)
+    
+    # Estadísticas para mostrar
+    total_usuarios = Usuario.query.count()
+    total_admins = Usuario.query.filter_by(is_admin=True).count()
+    usuarios_activos = Usuario.query.filter_by(is_active=True).count()
+    
+    # Usuarios nuevos este mes
+    from datetime import datetime
+    mes_actual = datetime.now().month
+    nuevos_este_mes = Usuario.query.filter(
+        extract('month', Usuario.created_at) == mes_actual
+    ).count()
 
+    return render_template('admin/users/usuarios.html', 
+                         usuarios=usuarios,
+                         total_usuarios=total_usuarios,
+                         total_admins=total_admins,
+                         usuarios_activos=usuarios_activos,
+                         nuevos_este_mes=nuevos_este_mes)
 
 @admin_cp.route('/usuarios/nuevo', methods=['GET', 'POST'])
 @login_required
@@ -232,8 +289,20 @@ def eliminar_usuario(id):
 def gestion_productos():
     productos = Producto.query.order_by(Producto.id.desc()).all()
     categorias = Categoria.query.order_by(Categoria.nombre.asc()).all()
-    return render_template('admin/productos/productos.html', productos=productos, categorias=categorias)
-
+    
+    # Estadísticas para mostrar
+    total_productos = Producto.query.count()
+    productos_destacados = Producto.query.filter_by(destacado=True).count()
+    stock_bajo = Producto.query.filter(Producto.stock < 3).count()
+    total_categorias = Categoria.query.count()
+    
+    return render_template('admin/productos/productos.html', 
+                         productos=productos, 
+                         categorias=categorias,
+                         total_productos=total_productos,
+                         productos_destacados=productos_destacados,
+                         stock_bajo=stock_bajo,
+                         total_categorias=total_categorias)
 
 # =====================================================
 #  NUEVO PRODUCTO

@@ -2,78 +2,247 @@
 {% block title %}Gestión de Productos - RopaStore{% endblock %}
 
 {% block content %}
-<div class="container py-4">
+<div class="container-fluid py-4">
 
-  <!-- ENCABEZADO -->
-  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold text-dark mb-3 mb-md-0">
-      <i class="bi bi-box-seam text-primary"></i> Gestión de Productos
-    </h2>
-
-    <div class="d-flex gap-2">
-      <button class="btn btn-outline-dark rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#modalCategorias">
-        <i class="bi bi-tags"></i> Categorías
-      </button>
-      <a href="{{ url_for('admin.nuevo_producto') }}" class="btn btn-primary rounded-pill shadow-sm">
-        <i class="bi bi-plus-circle"></i> Nuevo Producto
-      </a>
+  <!-- ENCABEZADO MEJORADO -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+        <div class="mb-3 mb-md-0">
+          <h1 class="h2 fw-bold text-dark mb-2">
+            <i class="bi bi-bag-check text-primary me-2"></i>Gestión de Productos
+          </h1>
+          <p class="text-muted mb-0">Administra el inventario y catálogo de productos</p>
+        </div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline-primary rounded-3 px-4 py-2" data-bs-toggle="modal" data-bs-target="#modalCategorias">
+            <i class="bi bi-tags me-2"></i>Categorías
+          </button>
+          <a href="{{ url_for('admin.nuevo_producto') }}" class="btn btn-primary rounded-3 px-4 py-2">
+            <i class="bi bi-plus-circle me-2"></i>Nuevo Producto
+          </a>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- 🔍 BARRA DE BÚSQUEDA -->
-  <div class="input-group mb-4 shadow-sm" style="max-width: 400px;">
-    <span class="input-group-text bg-dark text-white"><i class="bi bi-search"></i></span>
-    <input type="text" id="searchInput" class="form-control" placeholder="Buscar producto...">
+  <!-- ESTADÍSTICAS RÁPIDAS -->
+  <div class="row g-3 mb-4">
+    <div class="col-xl-3 col-md-6">
+      <div class="card border-0 bg-gradient-primary text-white rounded-4 shadow-sm">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h3 class="fw-bold mb-1">{{ total_productos }}</h3>
+              <p class="mb-0 opacity-75">Total Productos</p>
+            </div>
+            <div class="bg-white bg-opacity-20 rounded-3 p-3">
+              <i class="bi bi-box display-6"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+      <div class="card border-0 bg-gradient-success text-white rounded-4 shadow-sm">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h3 class="fw-bold mb-1">{{ productos_destacados }}</h3>
+              <p class="mb-0 opacity-75">Destacados</p>
+            </div>
+            <div class="bg-white bg-opacity-20 rounded-3 p-3">
+              <i class="bi bi-star display-6"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+      <div class="card border-0 bg-gradient-warning text-white rounded-4 shadow-sm">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h3 class="fw-bold mb-1">{{ stock_bajo }}</h3>
+              <p class="mb-0 opacity-75">Stock Bajo</p>
+            </div>
+            <div class="bg-white bg-opacity-20 rounded-3 p-3">
+              <i class="bi bi-exclamation-triangle display-6"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+      <div class="card border-0 bg-gradient-info text-white rounded-4 shadow-sm">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h3 class="fw-bold mb-1">{{ total_categorias }}</h3>
+              <p class="mb-0 opacity-75">Categorías</p>
+            </div>
+            <div class="bg-white bg-opacity-20 rounded-3 p-3">
+              <i class="bi bi-tags display-6"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- TABLA DE PRODUCTOS -->
+  <!-- BARRA DE HERRAMIENTAS -->
+  <div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body">
+      <div class="row g-3 align-items-center">
+        <div class="col-md-6">
+          <div class="input-group input-group-lg">
+            <span class="input-group-text bg-light border-end-0">
+              <i class="bi bi-search text-muted"></i>
+            </span>
+            <input type="text" id="searchInput" class="form-control border-start-0" 
+                   placeholder="Buscar productos por nombre, categoría...">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="d-flex gap-2 justify-content-md-end flex-wrap">
+            <div class="dropdown">
+              <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                <i class="bi bi-filter me-2"></i>Filtrar
+              </button>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item filter-option" data-filter="all" href="#">Todos los productos</a></li>
+                <li><a class="dropdown-item filter-option" data-filter="featured" href="#">Destacados</a></li>
+                <li><a class="dropdown-item filter-option" data-filter="low-stock" href="#">Stock bajo</a></li>
+                <li><a class="dropdown-item filter-option" data-filter="no-stock" href="#">Sin stock</a></li>
+              </ul>
+            </div>
+            <div class="dropdown">
+              <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                <i class="bi bi-sort-down me-2"></i>Ordenar
+              </button>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item sort-option" data-sort="name" href="#">Por nombre</a></li>
+                <li><a class="dropdown-item sort-option" data-sort="price" href="#">Por precio</a></li>
+                <li><a class="dropdown-item sort-option" data-sort="stock" href="#">Por stock</a></li>
+                <li><a class="dropdown-item sort-option" data-sort="recent" href="#">Más recientes</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLA DE PRODUCTOS MEJORADA -->
   <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
-    <div class="card-header text-black fw-semibold">
+    <div class="card-header bg-transparent border-0 py-4">
       <div class="d-flex justify-content-between align-items-center">
-        <span><i class="bi bi-list-ul"></i> Lista de Productos</span>
-        <span class="badge bg-light text-dark px-3 py-2">{{ productos|length }} registrados</span>
+        <h5 class="fw-bold mb-0">
+          <i class="bi bi-list-ul text-primary me-2"></i>Inventario de Productos
+        </h5>
+        <span class="badge bg-primary badge-modern px-3 py-2">
+          {{ productos|length }} producto{{ 's' if productos|length != 1 else '' }}
+        </span>
       </div>
     </div>
 
     <div class="card-body p-0">
-      <div class="table-responsive" style="max-height: 520px; overflow-y: auto;">
-        <table class="table table-hover align-middle mb-0 text-center" id="productTable">
+      <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+        <table class="table table-hover align-middle mb-0" id="productTable">
           <thead class="table-light sticky-top shadow-sm">
-            <tr class="text-uppercase small text-secondary">
-              <th>ID</th>
-              <th>Nombre</th>
+            <tr class="text-uppercase small">
+              <th class="ps-4">Producto</th>
               <th>Precio</th>
               <th>Stock</th>
               <th>Categoría</th>
-              <th>Destacado</th>
-              <th>Acciones</th>
+              <th>Estado</th>
+              <th class="text-center pe-4">Acciones</th>
             </tr>
           </thead>
           <tbody>
             {% for p in productos %}
-            <tr>
-              <td class="text-muted">#{{ p.id }}</td>
-              <td class="fw-semibold text-dark">{{ p.nombre }}</td>
-              <td>${{ "%.2f"|format(p.precio) }}</td>
-              <td>{{ p.stock }}</td>
-              <td>{{ p.categoria.nombre if p.categoria else '-' }}</td>
+            <tr class="product-row" 
+                data-name="{{ p.nombre.lower() }}" 
+                data-category="{{ p.categoria.nombre.lower() if p.categoria else '' }}"
+                data-featured="{{ 'true' if p.destacado else 'false' }}"
+                data-stock="{{ p.stock }}">
+              <td class="ps-4">
+                <div class="d-flex align-items-center">
+                  <div class="position-relative me-3">
+                    {% if p.imagen %}
+                    <img src="{{ url_for('admin.admin_serve_uploaded_file', filename=p.imagen) }}" 
+                         alt="{{ p.nombre }}" 
+                         class="rounded-3" 
+                         style="width: 50px; height: 50px; object-fit: cover;">
+                    {% else %}
+                    <div class="bg-light rounded-3 d-flex align-items-center justify-content-center"
+                         style="width: 50px; height: 50px;">
+                      <i class="bi bi-image text-muted"></i>
+                    </div>
+                    {% endif %}
+                    {% if p.destacado %}
+                    <span class="position-absolute top-0 start-100 translate-middle badge bg-warning rounded-pill">
+                      <i class="bi bi-star-fill"></i>
+                    </span>
+                    {% endif %}
+                  </div>
+                  <div>
+                    <h6 class="fw-bold text-dark mb-0">{{ p.nombre }}</h6>
+                    <small class="text-muted">ID: #{{ p.id }}</small>
+                  </div>
+                </div>
+              </td>
               <td>
-                {% if p.destacado %}
-                  <span class="badge bg-success">Sí</span>
+                <span class="fw-bold text-success">${{ "%.2f"|format(p.precio) }}</span>
+              </td>
+              <td>
+                <div class="d-flex align-items-center">
+                  <span class="fw-semibold {% if p.stock < 3 %}text-danger{% elif p.stock < 20 %}text-warning{% else %}text-dark{% endif %}">
+                    {{ p.stock }}
+                  </span>
+                  {% if p.stock < 3 %}
+                  <i class="bi bi-exclamation-triangle text-danger ms-1" data-bs-toggle="tooltip" title="Stock bajo"></i>
+                  {% endif %}
+                </div>
+              </td>
+              <td>
+                {% if p.categoria %}
+                <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill">
+                  {{ p.categoria.nombre }}
+                </span>
                 {% else %}
-                  <span class="badge bg-secondary">No</span>
+                <span class="badge bg-secondary bg-opacity-10 text-secondary px-3 py-2 rounded-pill">
+                  Sin categoría
+                </span>
                 {% endif %}
               </td>
               <td>
-                <div class="btn-group btn-group-sm" role="group">
+                {% if p.stock == 0 %}
+                <span class="badge bg-danger bg-opacity-10 text-danger px-3 py-2 rounded-pill">
+                  <i class="bi bi-x-circle me-1"></i>Agotado
+                </span>
+                {% elif p.stock < 3 %}
+                <span class="badge bg-warning bg-opacity-10 text-warning px-3 py-2 rounded-pill">
+                  <i class="bi bi-exclamation-triangle me-1"></i>Stock Bajo
+                </span>
+                {% else %}
+                <span class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill">
+                  <i class="bi bi-check-circle me-1"></i>Disponible
+                </span>
+                {% endif %}
+              </td>
+              <td class="pe-4">
+                <div class="d-flex justify-content-center gap-2">
                   <a href="{{ url_for('admin.editar_producto', id=p.id) }}" 
-                     class="btn btn-outline-warning rounded-circle" data-bs-toggle="tooltip" title="Editar">
-                    <i class="bi bi-pencil"></i>
+                     class="btn btn-outline-warning btn-sm rounded-3 px-3" 
+                     data-bs-toggle="tooltip" title="Editar producto">
+                    <i class="bi bi-pencil me-1"></i>Editar
                   </a>
                   <form method="POST" action="{{ url_for('admin.eliminar_producto', id=p.id) }}" class="d-inline"
-                        onsubmit="return confirm('¿Seguro que deseas eliminar este producto?');">
-                    <button type="submit" class="btn btn-outline-danger rounded-circle" data-bs-toggle="tooltip" title="Eliminar">
-                      <i class="bi bi-trash"></i>
+                        onsubmit="return confirm('¿Estás seguro de que deseas eliminar el producto \"{{ p.nombre }}\"? Esta acción no se puede deshacer.');">
+                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-3 px-3" 
+                            data-bs-toggle="tooltip" title="Eliminar producto">
+                      <i class="bi bi-trash me-1"></i>Eliminar
                     </button>
                   </form>
                 </div>
@@ -81,9 +250,15 @@
             </tr>
             {% else %}
             <tr>
-              <td colspan="7" class="text-muted py-5">
-                <i class="bi bi-box-seam fs-3"></i>
-                <p class="mt-2 mb-0">No hay productos registrados.</p>
+              <td colspan="6" class="text-center py-5">
+                <div class="text-muted">
+                  <i class="bi bi-bag-x display-4 mb-3"></i>
+                  <h5 class="fw-bold">No se encontraron productos</h5>
+                  <p class="mb-0">No hay productos registrados en el sistema.</p>
+                  <a href="{{ url_for('admin.nuevo_producto') }}" class="btn btn-primary mt-3">
+                    <i class="bi bi-plus-circle me-2"></i>Agregar Primer Producto
+                  </a>
+                </div>
               </td>
             </tr>
             {% endfor %}
@@ -94,89 +269,217 @@
   </div>
 </div>
 
-
-<!-- ============================= -->
-<!-- MODAL DE CATEGORÍAS -->
-<!-- ============================= -->
+<!-- MODAL DE CATEGORÍAS MEJORADO -->
 <div class="modal fade" id="modalCategorias" tabindex="-1" aria-labelledby="modalCategoriasLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content border-0 shadow-lg rounded-4">
-      <div class="modal-header bg-dark text-white">
-        <h5 class="modal-title"><i class="bi bi-tags"></i> Gestión de Categorías</h5>
+      <div class="modal-header bg-gradient-primary text-white">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-tags me-2"></i>Gestión de Categorías
+        </h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
-      <div class="modal-body">
-        <form id="formCategoria" method="POST" action="{{ url_for('admin.nueva_categoria') }}" class="d-flex mb-3">
-          <input type="text" name="nombre" class="form-control me-2" placeholder="Nueva categoría..." required>
-          <button type="submit" class="btn btn-primary"><i class="bi bi-plus-lg"></i></button>
-        </form>
+      <div class="modal-body p-4">
+        <!-- Formulario para nueva categoría -->
+        <div class="card border-0 bg-light rounded-3 mb-4">
+          <div class="card-body">
+            <h6 class="fw-bold text-dark mb-3">
+              <i class="bi bi-plus-circle text-primary me-2"></i>Agregar Nueva Categoría
+            </h6>
+            <form id="formCategoria" method="POST" action="{{ url_for('admin.nueva_categoria') }}" class="row g-3">
+              <div class="col-md-6">
+                <input type="text" name="nombre" class="form-control" placeholder="Nombre de la categoría" required>
+              </div>
+              <div class="col-md-6">
+                <input type="text" name="descripcion" class="form-control" placeholder="Descripción (opcional)">
+              </div>
+              <div class="col-12">
+                <button type="submit" class="btn btn-primary rounded-3">
+                  <i class="bi bi-plus-lg me-2"></i>Agregar Categoría
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
 
-        <table class="table table-striped align-middle text-center">
-          <thead class="table-dark">
-            <tr>
-              <th>ID</th>
-              <th>Nombre</th>
-              <th>Descripción</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for c in categorias %}
-            <tr>
-              <td>{{ c.id }}</td>
-              <td>{{ c.nombre }}</td>
-              <td>{{ c.descripcion or '-' }}</td>
-              <td>
-                <form method="POST" action="{{ url_for('admin.eliminar_categoria', id=c.id) }}" class="d-inline"
-                      onsubmit="return confirm('¿Eliminar esta categoría?');">
-                  <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
-                </form>
-              </td>
-            </tr>
-            {% else %}
-            <tr><td colspan="4" class="text-muted py-3">No hay categorías registradas.</td></tr>
-            {% endfor %}
-          </tbody>
-        </table>
+        <!-- Lista de categorías -->
+        <h6 class="fw-bold text-dark mb-3">
+          <i class="bi bi-list-check text-primary me-2"></i>Categorías Existentes
+        </h6>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Productos</th>
+                <th class="text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for c in categorias %}
+              <tr>
+                <td class="fw-semibold">#{{ c.id }}</td>
+                <td>
+                  <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill">
+                    {{ c.nombre }}
+                  </span>
+                </td>
+                <td class="text-muted">{{ c.descripcion or 'Sin descripción' }}</td>
+                <td>
+                  <span class="fw-semibold">{{ c.productos|length }}</span>
+                </td>
+                <td class="text-center">
+                  <form method="POST" action="{{ url_for('admin.eliminar_categoria', id=c.id) }}" class="d-inline"
+                        onsubmit="return confirm('¿Estás seguro de que deseas eliminar la categoría \"{{ c.nombre }}\"?');">
+                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-3 px-3">
+                      <i class="bi bi-trash me-1"></i>Eliminar
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="5" class="text-center text-muted py-4">
+                  <i class="bi bi-tags display-4 mb-3"></i>
+                  <p class="mb-0">No hay categorías registradas.</p>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ============================= -->
-<!-- ESTILOS -->
-<!-- ============================= -->
-<style>
-.table-hover tbody tr:hover {
-  background-color: #f8f9fa !important;
-  transform: scale(1.005);
-  transition: all 0.2s ease;
-}
-</style>
-
-<!-- ============================= -->
-<!-- SCRIPT: BÚSQUEDA DE PRODUCTOS -->
-<!-- ============================= -->
+<!-- SCRIPTS MEJORADOS -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const input = document.getElementById('searchInput');
-  const rows = document.querySelectorAll('#productTable tbody tr');
+  const searchInput = document.getElementById('searchInput');
+  const productRows = document.querySelectorAll('.product-row');
+  let currentFilter = 'all';
+  let currentSort = 'name';
 
-  input.addEventListener('keyup', () => {
-    const filter = input.value.toLowerCase();
-    rows.forEach(row => {
-      const nombre = row.cells[1]?.textContent.toLowerCase() || '';
-      if (nombre.includes(filter)) {
-        row.style.display = '';
-      } else {
-        row.style.display = 'none';
-      }
+  // Búsqueda en tiempo real
+  searchInput.addEventListener('input', () => {
+    const filter = searchInput.value.toLowerCase();
+    filterProducts(filter, currentFilter);
+  });
+
+  // Filtros
+  document.querySelectorAll('.filter-option').forEach(option => {
+    option.addEventListener('click', (e) => {
+      e.preventDefault();
+      currentFilter = option.dataset.filter;
+      filterProducts(searchInput.value.toLowerCase(), currentFilter);
     });
   });
 
-  // Activar tooltips de Bootstrap
+  // Ordenamiento
+  document.querySelectorAll('.sort-option').forEach(option => {
+    option.addEventListener('click', (e) => {
+      e.preventDefault();
+      currentSort = option.dataset.sort;
+      sortProducts(currentSort);
+    });
+  });
+
+  function filterProducts(textFilter, typeFilter) {
+    productRows.forEach(row => {
+      const name = row.dataset.name;
+      const category = row.dataset.category;
+      const featured = row.dataset.featured;
+      const stock = parseInt(row.dataset.stock);
+      
+      const textMatch = name.includes(textFilter) || category.includes(textFilter);
+      let typeMatch = true;
+      
+      switch(typeFilter) {
+        case 'featured': typeMatch = featured === 'true'; break;
+        case 'low-stock': typeMatch = stock < 3 && stock > 0; break;
+        case 'no-stock': typeMatch = stock === 0; break;
+      }
+      
+      row.style.display = (textMatch && typeMatch) ? '' : 'none';
+    });
+  }
+
+  function sortProducts(sortBy) {
+    const tbody = document.querySelector('#productTable tbody');
+    const rows = Array.from(productRows).filter(row => row.style.display !== 'none');
+    
+    rows.sort((a, b) => {
+      switch(sortBy) {
+        case 'name':
+          return a.dataset.name.localeCompare(b.dataset.name);
+        case 'price':
+          return parseFloat(a.cells[1].textContent.replace('$', '')) - parseFloat(b.cells[1].textContent.replace('$', ''));
+        case 'stock':
+          return parseInt(b.dataset.stock) - parseInt(a.dataset.stock);
+        case 'recent':
+          return 0; // Aquí podrías ordenar por fecha de creación
+        default:
+          return 0;
+      }
+    });
+    
+    // Reordenar las filas en la tabla
+    rows.forEach(row => tbody.appendChild(row));
+  }
+
+  // Tooltips
   const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
   tooltips.forEach(t => new bootstrap.Tooltip(t));
 });
 </script>
+
+<style>
+  .bg-gradient-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+  .bg-gradient-success { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
+  .bg-gradient-warning { background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); }
+  .bg-gradient-info { background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%); }
+
+  .table-hover tbody tr {
+    transition: all 0.25s ease;
+    border-left: 3px solid transparent;
+  }
+
+  .table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+    border-left-color: #667eea;
+    transform: translateX(2px);
+  }
+
+  .badge-modern {
+    border-radius: 20px;
+    font-weight: 600;
+  }
+
+  .btn-outline-warning:hover {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+    border-color: #ffc107;
+    color: #212529;
+  }
+
+  .btn-outline-danger:hover {
+    background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+    border-color: #dc3545;
+    color: white;
+  }
+
+  .card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+  }
+
+  .bg-opacity-10 {
+    background-opacity: 0.1 !important;
+  }
+</style>
 {% endblock %}
