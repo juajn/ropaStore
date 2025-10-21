@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Panel de Control - RopaStore{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <h2 class="fw-bold mb-4 text-center text-dark">
+    <i class="bi bi-speedometer2 text-primary"></i> Panel de Control del Administrador
+  </h2>
+
+  <div class="row g-4 mb-5">
+    <!-- Usuarios -->
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body text-center">
+          <i class="bi bi-people display-5 text-primary mb-3"></i>
+          <h5 class="card-title">Usuarios Registrados</h5>
+          <p class="fs-4 fw-semibold text-dark">{{ total_usuarios }}</p>
+          <a href="{{ url_for('admin.gestion_usuarios') }}" class="btn btn-outline-primary btn-sm">
+            Gestionar <i class="bi bi-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Productos -->
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body text-center">
+          <i class="bi bi-bag-check display-5 text-success mb-3"></i>
+          <h5 class="card-title">Productos Activos</h5>
+          <p class="fs-4 fw-semibold text-dark">{{ total_productos }}</p>
+          <a href="{{ url_for('admin.gestion_productos') }}" class="btn btn-outline-success btn-sm">
+            Gestionar <i class="bi bi-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ventas -->
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body text-center">
+          <i class="bi bi-cash-stack display-5 text-warning mb-3"></i>
+          <h5 class="card-title">Total Ventas</h5>
+          <p class="fs-4 fw-semibold text-dark">${{ "{:,.2f}".format(total_ventas) }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gráfico -->
+  <div class="card border-0 shadow-sm">
+    <div class="card-header bg-dark text-white">
+      <i class="bi bi-bar-chart-line"></i> Ventas por Mes
+    </div>
+    <div class="card-body">
+      <canvas id="ventasChart" height="100"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const ctx = document.getElementById('ventasChart');
+  const ventasChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: {{ meses | tojson }},
+      datasets: [{
+        label: 'Ventas ($)',
+        data: {{ montos | tojson }},
+        backgroundColor: 'rgba(13, 110, 253, 0.7)',
+        borderColor: 'rgba(13, 110, 253, 1)',
+        borderWidth: 1,
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        title: {
+          display: false
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { stepSize: 100 }
+        }
+      }
+    }
+  });
+</script>
+{% endblock %}

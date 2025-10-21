@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Registro{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-center align-items-center min-vh-100 bg-light">
+  <div class="card shadow-lg border-0 rounded-4 p-4" style="max-width: 420px; width: 100%;">
+    <div class="card-body">
+      <h3 class="text-center mb-4 text-success fw-bold">Crear Cuenta</h3>
+
+      <form method="POST" novalidate>
+        <!-- Nombre de usuario -->
+        <div class="mb-3">
+          <label for="username" class="form-label fw-semibold">Nombre de usuario</label>
+          <input 
+            type="text" 
+            class="form-control form-control-lg" 
+            id="username" 
+            name="username" 
+            placeholder="Tu nombre de usuario"
+            required
+          >
+          <div class="invalid-feedback">El nombre de usuario es obligatorio.</div>
+        </div>
+
+        <!-- Correo electrónico -->
+        <div class="mb-3">
+          <label for="email" class="form-label fw-semibold">Correo electrónico</label>
+          <input 
+            type="email" 
+            class="form-control form-control-lg" 
+            id="email" 
+            name="email" 
+            placeholder="ejemplo@correo.com"
+            required
+          >
+          <div class="invalid-feedback">Introduce un correo electrónico válido.</div>
+        </div>
+
+        <!-- Contraseña -->
+        <div class="mb-3 position-relative">
+          <label for="password" class="form-label fw-semibold">Contraseña</label>
+          <div class="input-group">
+            <input 
+              type="password" 
+              class="form-control form-control-lg" 
+              id="password" 
+              name="password" 
+              placeholder="••••••••"
+              minlength="6"
+              required
+            >
+            <button 
+              class="btn btn-outline-secondary" 
+              type="button" 
+              id="togglePassword"
+              tabindex="-1"
+            >
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
+          <div class="form-text">Debe tener al menos 6 caracteres.</div>
+        </div>
+
+        <!-- Botón de registro -->
+        <button type="submit" class="btn btn-success btn-lg w-100 mt-3">
+          Registrarse
+        </button>
+
+        <!-- Enlace a inicio de sesión -->
+        <div class="text-center mt-3">
+          <small class="text-muted">
+            ¿Ya tienes cuenta?
+            <a href="{{ url_for('auth.login') }}" class="text-decoration-none fw-semibold">Inicia sesión</a>
+          </small>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Script para mostrar/ocultar contraseña -->
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const togglePassword = document.getElementById("togglePassword");
+    const passwordInput = document.getElementById("password");
+    togglePassword.addEventListener("click", function() {
+      const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+      passwordInput.setAttribute("type", type);
+      this.innerHTML = type === "password" 
+        ? '<i class="bi bi-eye"></i>' 
+        : '<i class="bi bi-eye-slash"></i>';
+    });
+  });
+</script>
+{% endblock %}

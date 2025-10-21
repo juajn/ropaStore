@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Mi Carrito{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4 text-center">🛒 Mi Carrito</h2>
+
+  {% if carrito %}
+    <table class="table table-hover align-middle">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Precio</th>
+          <th>Cantidad</th>
+          <th>Subtotal</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in carrito.values() %}
+          <tr>
+            <td>
+              <img src="{{ url_for('static', filename='uploads/productos/' + item.imagen) }}"
+                   width="60" class="me-2 rounded">
+              {{ item.nombre }}
+            </td>
+            <td>${{ "%.2f"|format(item.precio) }}</td>
+            <td>{{ item.cantidad }}</td>
+            <td>${{ "%.2f"|format(item.precio * item.cantidad) }}</td>
+            <td>
+              <a href="{{ url_for('usuario_cp.eliminar_carrito', producto_id=item.id) }}"
+                 class="btn btn-sm btn-danger">🗑️</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="text-end mt-3">
+      <h4>Total: <span class="text-success">${{ "%.2f"|format(total) }}</span></h4>
+      <a href="{{ url_for('usuario_cp.vaciar_carrito') }}" class="btn btn-outline-danger">
+        Vaciar carrito
+      </a>
+      <button class="btn btn-success">Finalizar compra</button>
+    </div>
+  {% else %}
+    <p class="text-center text-muted mt-5">Tu carrito está vacío.</p>
+  {% endif %}
+</div>
+{% endblock %}

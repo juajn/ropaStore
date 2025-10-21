@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% block title %}Gestión de Usuarios - RopaStore{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- ENCABEZADO -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-dark mb-3 mb-md-0">
+      <i class="bi bi-people-fill text-primary"></i> Gestión de Usuarios
+    </h2>
+    <a href="{{ url_for('admin.nuevo_usuario') }}" class="btn btn-primary px-3 rounded-pill shadow-sm">
+      <i class="bi bi-person-plus"></i> Nuevo Usuario
+    </a>
+  </div>
+
+  <!-- BARRA DE BÚSQUEDA -->
+  <div class="input-group mb-4 shadow-sm" style="max-width: 420px;">
+    <span class="input-group-text bg-primary text-white border-0 rounded-start">
+      <i class="bi bi-search"></i>
+    </span>
+    <input type="text" id="searchInput" class="form-control border-0" placeholder="Buscar usuario o correo...">
+  </div>
+
+  <!-- TABLA DE USUARIOS -->
+  <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+    <div class="card-header text-black fw-semibold">
+      <div class="d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-list-ul"></i> Lista de Usuarios</span>
+        <span class="badge bg-light text-dark px-3 py-2">{{ usuarios|length }} registrados</span>
+      </div>
+    </div>
+
+    <div class="card-body p-0">
+      <div class="table-responsive" style="max-height: 520px; overflow-y: auto;">
+        <table class="table table-hover align-middle mb-0" id="userTable">
+          <thead class="table-light sticky-top shadow-sm">
+            <tr class="text-uppercase small text-secondary">
+              <th>ID</th>
+              <th>Usuario</th>
+              <th>Email</th>
+              <th>Rol</th>
+              <th>Fecha Registro</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="text-center">
+            {% for u in usuarios %}
+            <tr>
+              <td class="text-muted">#{{ u.id }}</td>
+              <td class="fw-semibold text-dark">{{ u.username }}</td>
+              <td class="text-muted">{{ u.email }}</td>
+              <td>
+                {% if u.is_admin %}
+                  <span class="badge bg-gradient bg-danger text-light px-3 py-2">Administrador</span>
+                {% else %}
+                  <span class="badge bg-gradient bg-secondary text-light px-3 py-2">Usuario</span>
+                {% endif %}
+              </td>
+              <td>{{ u.created_at.strftime('%d/%m/%Y') }}</td>
+              <td>
+                <div class="btn-group btn-group-sm" role="group">
+                  <a href="{{ url_for('admin.editar_usuario', id=u.id) }}" 
+                     class="btn btn-outline-warning rounded-circle" data-bs-toggle="tooltip" title="Editar">
+                    <i class="bi bi-pencil"></i>
+                  </a>
+                  <form method="POST" action="{{ url_for('admin.eliminar_usuario', id=u.id) }}" class="d-inline"
+                        onsubmit="return confirm('¿Seguro que deseas eliminar este usuario?');">
+                    <button type="submit" class="btn btn-outline-danger rounded-circle" data-bs-toggle="tooltip" title="Eliminar">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="6" class="text-muted py-5">
+                <i class="bi bi-person-slash fs-3"></i>
+                <p class="mt-2 mb-0">No se encontraron usuarios.</p>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCRIPT: FILTRO DE BÚSQUEDA -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('searchInput');
+  const rows = document.querySelectorAll('#userTable tbody tr');
+
+  input.addEventListener('keyup', () => {
+    const filter = input.value.toLowerCase();
+    rows.forEach(row => {
+      const username = row.cells[1]?.textContent.toLowerCase() || '';
+      const email = row.cells[2]?.textContent.toLowerCase() || '';
+      row.style.display = (username.includes(filter) || email.includes(filter)) ? '' : 'none';
+    });
+  });
+
+  // Tooltips
+  const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+  tooltips.forEach(t => new bootstrap.Tooltip(t));
+});
+</script>
+
+<!-- ESTILOS -->
+<style>
+  h2 i { margin-right: 8px; }
+
+  .table-hover tbody tr {
+    transition: all 0.25s ease;
+  }
+
+  .table-hover tbody tr:hover {
+    background-color: #e4e8ed;
+    transform: scale(1.005);
+  }
+
+  .card {
+    border-radius: 1rem;
+  }
+
+  .badge {
+    font-size: 0.85rem;
+    letter-spacing: 0.3px;
+  }
+
+  .btn-outline-warning, .btn-outline-danger {
+    border-width: 2px;
+    transition: all 0.2s ease;
+  }
+
+  .btn-outline-warning:hover {
+    background-color: #ffc107;
+    color: #212529;
+  }
+
+  .btn-outline-danger:hover {
+    background-color: #dc3545;
+    color: #fff;
+  }
+
+  #searchInput {
+    border-radius: 0 0.75rem 0.75rem 0;
+    transition: box-shadow 0.2s ease;
+  }
+
+  #searchInput:focus {
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+  }
+
+  thead th {
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+</style>
+{% endblock %}

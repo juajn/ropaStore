@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Editar Producto - RopaStore{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-center min-vh-100 bg-light">
+  <div class="card shadow-lg border-0 rounded-4 p-4 p-md-5" 
+       style="max-width: 500px; width: 100%; background: rgba(255, 255, 255, 0.95);">
+
+    <div class="text-center mb-4">
+      <div class="rounded-circle bg-warning text-white d-inline-flex align-items-center justify-content-center"
+           style="width: 60px; height: 60px;">
+        <i class="bi bi-pencil fs-3"></i>
+      </div>
+      <h3 class="fw-bold mt-3">Editar Producto</h3>
+      <p class="text-muted">Modifica los datos del producto</p>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data">
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Nombre</label>
+        <input type="text" name="nombre" value="{{ producto.nombre }}" class="form-control form-control-lg shadow-sm" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Descripción</label>
+        <textarea name="descripcion" rows="3" class="form-control shadow-sm" required>{{ producto.descripcion }}</textarea>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Precio</label>
+        <input type="number" name="precio" step="0.01" value="{{ producto.precio }}" class="form-control form-control-lg shadow-sm" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Stock</label>
+        <input type="number" name="stock" value="{{ producto.stock }}" class="form-control form-control-lg shadow-sm" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Categoría</label>
+        <select name="categoria_id" class="form-select shadow-sm">
+          <option value="">Sin categoría</option>
+          {% for c in categorias %}
+            <option value="{{ c.id }}" {% if producto.categoria_id == c.id %}selected{% endif %}>{{ c.nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- 🔹 IMAGEN -->
+      <div class="mb-3 text-center">
+        <label class="form-label fw-semibold">Imagen actual</label>
+        {% if producto.imagen %}
+          <div class="mb-2">
+            <img src="{{ url_for('static', filename='uploads/productos/' ~ producto.imagen) }}" 
+                 alt="Imagen del producto" class="img-fluid rounded shadow-sm" style="max-height: 180px;">
+          </div>
+        {% else %}
+          <p class="text-muted">No hay imagen registrada.</p>
+        {% endif %}
+        <label class="form-label fw-semibold mt-2">Cambiar imagen</label>
+        <input type="file" name="imagen" id="imagen" accept="image/*" class="form-control shadow-sm">
+        <img id="preview" src="#" alt="Vista previa" class="img-fluid rounded shadow-sm d-none mt-3" style="max-height: 200px;">
+      </div>
+
+      <div class="form-check form-switch mb-4">
+        <input class="form-check-input" type="checkbox" name="destacado" id="destacado"
+               {% if producto.destacado %}checked{% endif %}>
+        <label class="form-check-label fw-semibold" for="destacado">Marcar como destacado</label>
+      </div>
+
+      <div class="d-flex justify-content-between">
+        <a href="{{ url_for('admin.gestion_productos') }}" class="btn btn-light rounded-pill px-4 shadow-sm">Volver</a>
+        <button type="submit" class="btn btn-warning rounded-pill px-4 shadow-sm text-white">Actualizar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- SCRIPT: Vista previa de imagen -->
+<script>
+document.getElementById('imagen').addEventListener('change', function(event) {
+  const file = event.target.files[0];
+  const preview = document.getElementById('preview');
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      preview.src = e.target.result;
+      preview.classList.remove('d-none');
+    };
+    reader.readAsDataURL(file);
+  } else {
+    preview.classList.add('d-none');
+  }
+});
+</script>
+{% endblock %}

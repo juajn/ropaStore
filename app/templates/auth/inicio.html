@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Inicio - RopaStore{% endblock %}
+
+{% block content %}
+<section class="text-center py-5 bg-light rounded-4 shadow-sm mb-4">
+  <div class="container">
+    <h1 class="display-5 fw-bold">Bienvenido a <span class="text-primary">RopaStore</span></h1>
+    <p class="lead text-muted mb-4">
+      Descubre las últimas tendencias en moda para hombres, mujeres y niños.
+    </p>
+  </div>
+</section>
+
+<!-- CATEGORÍAS -->
+<section class="container my-5">
+  <h2 class="text-center mb-4 fw-bold">Categorías Populares</h2>
+  <div class="row g-4">
+    {% for categoria in categorias %}
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+          <img src="{{ url_for('static', filename='img/categorias/' ~ categoria.id ~ '.jpg') }}" 
+               class="card-img-top" 
+               alt="{{ categoria.nombre }}">
+          <div class="card-body text-center">
+            <h5 class="card-title fw-bold">{{ categoria.nombre }}</h5>
+            <p class="card-text text-muted">{{ categoria.descripcion }}</p>
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <p class="text-center text-muted">No hay categorías disponibles.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- PRODUCTOS DESTACADOS -->
+<section class="container my-5">
+  <h2 class="text-center mb-4 fw-bold">Productos Destacados</h2>
+  <div class="row row-cols-1 row-cols-md-4 g-4">
+    {% for producto in productos_destacados %}
+      <div class="col">
+        <div class="card border-0 shadow-sm h-100">
+          <img src="{{ url_for('static', filename='img/productos/' ~ producto.imagen) }}" 
+               class="card-img-top" 
+               alt="{{ producto.nombre }}">
+          <div class="card-body text-center">
+            <h6 class="fw-bold">{{ producto.nombre }}</h6>
+            <p class="text-muted mb-1">{{ producto.categoria.nombre }}</p>
+            <p class="fw-bold text-primary">${{ "%.2f"|format(producto.precio) }}</p>
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <p class="text-center text-muted">No hay productos destacados disponibles.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- PRODUCTOS RECIENTES -->
+<section class="container my-5">
+  <h2 class="text-center mb-4 fw-bold">Nuevos Productos</h2>
+  <div class="row row-cols-1 row-cols-md-4 g-4">
+    {% for producto in productos %}
+      <div class="col">
+        <div class="card border-0 shadow-sm h-100">
+          <img src="{{ url_for('static', filename='img/productos/' ~ producto.imagen) }}" 
+               class="card-img-top" 
+               alt="{{ producto.nombre }}">
+          <div class="card-body text-center">
+            <h6 class="fw-bold">{{ producto.nombre }}</h6>
+            <p class="text-muted mb-1">{{ producto.categoria.nombre }}</p>
+            <p class="fw-bold text-primary">${{ "%.2f"|format(producto.precio) }}</p>
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <p class="text-center text-muted">No hay productos disponibles.</p>
+    {% endfor %}
+  </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Dashboard de Usuario{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4 text-center">🛍️ Catálogo de Productos</h2>
+
+  <!-- Filtros -->
+  <form method="GET" action="{{ url_for('usuario_cp.user_dashboard') }}" class="row g-3 mb-4">
+    <div class="col-md-6">
+      <input type="text" name="buscar" class="form-control" placeholder="Buscar producto..."
+             value="{{ request.args.get('buscar', '') }}">
+    </div>
+    <div class="col-md-4">
+      <select name="categoria" class="form-select">
+        <option value="">Todas las categorías</option>
+        {% for c in categorias %}
+          <option value="{{ c.id }}" {% if request.args.get('categoria') == c.id|string %}selected{% endif %}>
+            {{ c.nombre }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2 d-grid">
+      <button type="submit" class="btn btn-primary">Filtrar</button>
+    </div>
+  </form>
+
+  <!-- Grid de productos -->
+  <div class="row">
+    {% for p in productos %}
+      <div class="col-md-3 mb-4">
+        <div class="card h-100 shadow-sm">
+          {% if p.imagen %}
+            <!-- CAMBIO IMPORTANTE: Usa la nueva ruta -->
+            <img src="{{ url_for('usuario_cp.serve_uploaded_file', filename=p.imagen) }}"
+                 class="card-img-top" 
+                 alt="{{ p.nombre }}"
+                 style="height: 200px; object-fit: cover; width: 100%;">
+          {% else %}
+            <img src="{{ url_for('static', filename='img/no-image.png') }}"
+                 class="card-img-top" 
+                 alt="Sin imagen"
+                 style="height: 200px; object-fit: cover; width: 100%;">
+          {% endif %}
+
+          <div class="card-body text-center d-flex flex-column">
+            <h5 class="card-title">{{ p.nombre }}</h5>
+            <p class="text-muted small">{{ p.categoria.nombre if p.categoria else 'Sin categoría' }}</p>
+            <p class="fw-bold text-success mt-auto">${{ "%.2f"|format(p.precio) }}</p>
+            <form action="{{ url_for('usuario_cp.agregar_carrito', producto_id=p.id) }}" method="POST" class="mt-auto">
+              <button type="submit" class="btn btn-sm btn-outline-success w-100">
+                Agregar al carrito 🛒
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <div class="col-12 text-center text-muted">
+        <p>No se encontraron productos.</p>
+      </div>
+    {% endfor %}
+  </div>
+
+  
+</div>
+{% endblock %}

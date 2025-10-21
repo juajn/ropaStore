@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Nuevo Usuario - RopaStore{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-center min-vh-100 bg-light">
+  <div class="card shadow-lg border-0 rounded-4 p-4 p-md-5" 
+       style="max-width: 480px; width: 100%; background: rgba(255, 255, 255, 0.95);">
+
+    <div class="text-center mb-4">
+      <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center"
+           style="width: 60px; height: 60px;">
+        <i class="bi bi-person-plus fs-3"></i>
+      </div>
+      <h3 class="fw-bold mt-3">Nuevo Usuario</h3>
+      <p class="text-muted">Crea una nueva cuenta para el sistema</p>
+    </div>
+
+    <form method="POST">
+      <!-- Nombre de usuario -->
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Nombre de usuario</label>
+        <input type="text" name="username" class="form-control form-control-lg shadow-sm" required>
+      </div>
+
+      <!-- Correo electrónico -->
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Correo electrónico</label>
+        <input type="email" name="email" class="form-control form-control-lg shadow-sm" required>
+      </div>
+
+      <!-- Contraseña -->
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Contraseña</label>
+        <input type="password" name="password" class="form-control form-control-lg shadow-sm" required>
+      </div>
+
+      <!-- Confirmar contraseña -->
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Confirmar contraseña</label>
+        <input type="password" name="confirm_password" class="form-control form-control-lg shadow-sm" required>
+      </div>
+
+      <!-- Rol de administrador -->
+      <div class="form-check form-switch mb-4">
+        <input class="form-check-input" type="checkbox" name="is_admin" id="is_admin">
+        <label class="form-check-label fw-semibold" for="is_admin">Marcar como administrador</label>
+      </div>
+
+      <!-- Botones -->
+      <div class="d-flex justify-content-between">
+        <a href="{{ url_for('admin.gestion_usuarios') }}" class="btn btn-light rounded-pill px-4 shadow-sm">Cancelar</a>
+        <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}Editar Usuario - RopaStore{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-center min-vh-100 bg-light position-relative overflow-hidden">
+
+
+  <!-- Tarjeta principal -->
+  <div class="card shadow-lg border-0 rounded-4 p-4 p-md-5"
+       style="max-width: 480px; width: 100%; backdrop-filter: blur(14px); background: rgba(255, 255, 255, 0.9); z-index: 1;">
+    
+    <!-- Encabezado -->
+    <div class="text-center mb-4">
+      <div class="rounded-circle bg-warning bg-gradient text-white d-inline-flex align-items-center justify-content-center shadow-sm"
+           style="width: 60px; height: 60px;">
+        <i class="bi bi-pencil fs-3"></i>
+      </div>
+      <h3 class="fw-bold mt-3 mb-1 text-dark">Editar Usuario</h3>
+      <p class="text-muted mb-0">Modifica los datos del usuario seleccionado</p>
+    </div>
+
+    <!-- Formulario -->
+    <form method="POST" class="needs-validation" novalidate>
+      <div class="mb-3">
+        <label class="form-label fw-semibold text-secondary">Nombre de usuario</label>
+        <input type="text" name="username" class="form-control form-control-lg rounded-3 border-0 shadow-sm"
+               value="{{ usuario.username }}" required>
+        <div class="invalid-feedback">Por favor, ingresa un nombre de usuario.</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold text-secondary">Correo electrónico</label>
+        <input type="email" name="email" class="form-control form-control-lg rounded-3 border-0 shadow-sm"
+               value="{{ usuario.email }}" required>
+        <div class="invalid-feedback">Por favor, ingresa un correo válido.</div>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label fw-semibold text-secondary">Nueva contraseña (opcional)</label>
+        <input type="password" name="password" class="form-control form-control-lg rounded-3 border-0 shadow-sm"
+               placeholder="Dejar en blanco para no cambiar">
+      </div>
+
+      <!-- Switch de administrador -->
+      <div class="form-check form-switch mb-4">
+        <input class="form-check-input" type="checkbox" name="is_admin" id="is_admin"
+               {% if usuario.is_admin %}checked{% endif %}>
+        <label class="form-check-label fw-semibold text-secondary" for="is_admin">Administrador</label>
+      </div>
+
+      <!-- Botones -->
+      <div class="d-flex justify-content-between">
+        <a href="{{ url_for('admin.gestion_usuarios') }}" 
+           class="btn btn-light px-4 py-2 rounded-pill border-0 shadow-sm fw-semibold text-secondary">
+          <i class="bi bi-arrow-left"></i> Volver
+        </a>
+        <button type="submit" class="btn btn-warning px-4 py-2 rounded-pill shadow-sm fw-semibold text-white">
+          <i class="bi bi-check-circle"></i> Actualizar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- SCRIPT: Validación -->
+<script>
+(() => {
+  'use strict';
+  const forms = document.querySelectorAll('.needs-validation');
+  Array.from(forms).forEach(form => {
+    form.addEventListener('submit', event => {
+      if (!form.checkValidity()) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      form.classList.add('was-validated');
+    }, false);
+  });
+})();
+</script>
+
+<!-- ESTILOS PERSONALIZADOS -->
+<style>
+  body {
+    background-color: #f8f9fa;
+  }
+
+  .card {
+    transition: all 0.35s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  }
+
+  .form-control {
+    background-color: #ffffff;
+    transition: all 0.3s ease;
+  }
+
+  .form-control:focus {
+    border-color: #ffc107;
+    box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25);
+  }
+
+  .btn-warning {
+    background: linear-gradient(135deg, #ffc107, #ffb300);
+    border: none;
+  }
+
+  .btn-warning:hover {
+    background: linear-gradient(135deg, #ffb300, #e0a800);
+  }
+
+  .btn-light:hover {
+    background-color: #e9ecef;
+  }
+
+  .form-check-input:checked {
+    background-color: #ffc107;
+    border-color: #ffc107;
+  }
+
+  @media (max-width: 576px) {
+    .card {
+      border-radius: 1rem;
+      padding: 2rem 1.5rem;
+    }
+  }
+</style>
+{% endblock %}
