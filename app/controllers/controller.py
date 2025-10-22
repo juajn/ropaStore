@@ -1,12 +1,13 @@
 import datetime
 from io import BytesIO
-from flask import Blueprint, flash, redirect, render_template, request, send_file, send_from_directory, session, url_for
+import traceback
+from flask import Blueprint, abort, flash, jsonify, redirect, render_template, request, send_file, send_from_directory, session, url_for
 import os
 from werkzeug.security import generate_password_hash
 from werkzeug.utils import secure_filename
 from sqlalchemy import extract, func
 from app import db
-from datetime import datetime, date, time
+from datetime import datetime, date, time, timedelta
 from flask_login import current_user, login_required, login_user, logout_user
 from fpdf import FPDF  
 from app.models.models import Categoria, DetalleVenta, Gasto, Producto, Usuario, Venta
@@ -801,3 +802,98 @@ def vaciar_carrito():
     session.pop('carrito', None)
     flash("Carrito vaciado.", "info")
     return redirect(url_for('usuario_cp.ver_carrito'))
+# -------------------------------
+# RUTA DE INVENTARIO (ADMIN)
+# -------------------------------
+@admin_cp.route('/inventario')
+@login_required
+def inventario():
+   
+    
+    # Obtener todos los productos con sus categorías
+    productos = Producto.query.options(db.joinedload(Producto.categoria)).all()
+    
+    return render_template('admin/inventario/inventario.html', productos=productos)
+
+
+# -------------------------------
+# EDITAR PRODUCTO-inventario
+# -------------------------------
+@admin_cp.route('/admin/editar_productos/<int:id>', methods=['GET', 'POST'])
+def editar_productos(id):
+    producto = Producto.query.get_or_404(id)
+    categorias = Categoria.query.all()
+
+    if request.method == 'POST':
+        producto.nombre = request.form['nombre']
+        producto.descripcion = request.form['descripcion']
+        producto.precio = float(request.form['precio'])
+        producto.stock = int(request.form['stock'])
+        producto.categoria_id = request.form.get('categoria_id') or None
+        producto.destacado = 'destacado' in request.form
+
+        imagen_archivo = request.files.get('imagen')
+
+        # 🔹 Si se sube una nueva imagen, reemplazamos la anterior
+        if imagen_archivo and allowed_file(imagen_archivo.filename):
+            filename = secure_filename(imagen_archivo.filename)
+            os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+            path = os.path.join(UPLOAD_FOLDER, filename)
+            imagen_archivo.save(path)
+
+            # Eliminar imagen anterior si existía
+            if producto.imagen:
+                old_path = os.path.join(UPLOAD_FOLDER, producto.imagen)
+                if os.path.exists(old_path):
+                    os.remove(old_path)
+
+            producto.imagen = filename
+
+        db.session.commit()
+        flash('✅ Producto actualizado correctamente.', 'success')
+        return redirect(url_for('admin.inventario'))
+
+    return render_template('admin/inventario/editar_productos.html', producto=producto, categorias=categorias) 
+@admin_cp.route('/admin/nuevos_productos', methods=['GET', 'POST'])
+def nuevos_productos():
+    categorias = Categoria.query.all()
+
+    if request.method == 'POST':
+        nombre = request.form['nombre']
+        descripcion = request.form['descripcion']
+        precio = float(request.form['precio'])
+        stock = int(request.form['stock'])
+        categoria_id = request.form.get('categoria_id') or None
+        destacado = 'destacado' in request.form
+
+        imagen_archivo = request.files.get('imagen')
+        nombre_imagen = None
+
+        # 🔹 Subida de imagen
+        if imagen_archivo and allowed_file(imagen_archivo.filename):
+            filename = secure_filename(imagen_archivo.filename)
+            os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+            path = os.path.join(UPLOAD_FOLDER, filename)
+            imagen_archivo.save(path)
+            nombre_imagen = filename
+
+        nuevo = Producto(
+            nombre=nombre,
+            descripcion=descripcion,
+            precio=precio,
+            stock=stock,
+            categoria_id=categoria_id,
+            destacado=destacado,
+            imagen=nombre_imagen
+        )
+
+        db.session.add(nuevo)
+        db.session.commit()
+        flash('✅ Producto creado correctamente.', 'success')
+
+        return redirect(url_for('admin.inventario'))
+
+    return render_template('admin/inventario/nuevo_producto.html', categorias=categorias)
+
+
+

@@ -38,6 +38,7 @@ def create_app():
     from app.controllers.controller import (
         inicio_cp, usuario_cp, producto_cp, admin_cp, auth_cp
     )
+
     app.register_blueprint(inicio_cp)
     app.register_blueprint(usuario_cp)
     app.register_blueprint(producto_cp)

@@ -18,7 +18,8 @@
           <button class="btn btn-outline-primary rounded-3 px-4 py-2" data-bs-toggle="modal" data-bs-target="#modalCategorias">
             <i class="bi bi-tags me-2"></i>Categorías
           </button>
-          <a href="{{ url_for('admin.nuevo_producto') }}" class="btn btn-primary rounded-3 px-4 py-2">
+          
+          <a href="{{ url_for('admin.nuevo_producto') }}" class="btn btn-success rounded-3 px-4 py-2">
             <i class="bi bi-plus-circle me-2"></i>Nuevo Producto
           </a>
         </div>
@@ -105,28 +106,13 @@
         </div>
         <div class="col-md-6">
           <div class="d-flex gap-2 justify-content-md-end flex-wrap">
-            <div class="dropdown">
-              <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                <i class="bi bi-filter me-2"></i>Filtrar
-              </button>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item filter-option" data-filter="all" href="#">Todos los productos</a></li>
-                <li><a class="dropdown-item filter-option" data-filter="featured" href="#">Destacados</a></li>
-                <li><a class="dropdown-item filter-option" data-filter="low-stock" href="#">Stock bajo</a></li>
-                <li><a class="dropdown-item filter-option" data-filter="no-stock" href="#">Sin stock</a></li>
-              </ul>
-            </div>
-            <div class="dropdown">
-              <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                <i class="bi bi-sort-down me-2"></i>Ordenar
-              </button>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item sort-option" data-sort="name" href="#">Por nombre</a></li>
-                <li><a class="dropdown-item sort-option" data-sort="price" href="#">Por precio</a></li>
-                <li><a class="dropdown-item sort-option" data-sort="stock" href="#">Por stock</a></li>
-                <li><a class="dropdown-item sort-option" data-sort="recent" href="#">Más recientes</a></li>
-              </ul>
-            </div>
+            <button class="btn btn-primary rounded-3 px-4 py-2" data-bs-toggle="modal" data-bs-target="#filtroModal">
+            <i class="bi bi-funnel me-2"></i>Filtrar & Ordenar
+          </button>
+            <button class="btn btn-outline-primary" id="limpiarFiltros">
+              <i class="bi bi-arrow-clockwise me-2"></i>Limpiar Filtros
+            </button>
+            
           </div>
         </div>
       </div>
@@ -140,9 +126,11 @@
         <h5 class="fw-bold mb-0">
           <i class="bi bi-list-ul text-primary me-2"></i>Inventario de Productos
         </h5>
-        <span class="badge bg-primary badge-modern px-3 py-2">
-          {{ productos|length }} producto{{ 's' if productos|length != 1 else '' }}
-        </span>
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge bg-primary px-3 py-2" id="productosFiltrados">
+            {{ productos|length }} producto{{ 's' if productos|length != 1 else '' }}
+          </span>
+        </div>
       </div>
     </div>
 
@@ -165,7 +153,9 @@
                 data-name="{{ p.nombre.lower() }}" 
                 data-category="{{ p.categoria.nombre.lower() if p.categoria else '' }}"
                 data-featured="{{ 'true' if p.destacado else 'false' }}"
-                data-stock="{{ p.stock }}">
+                data-stock="{{ p.stock }}"
+                data-price="{{ p.precio }}"
+                data-status="{{ 'agotado' if p.stock == 0 else 'bajo' if p.stock < 3 else 'disponible' }}">
               <td class="ps-4">
                 <div class="d-flex align-items-center">
                   <div class="position-relative me-3">
@@ -269,6 +259,140 @@
   </div>
 </div>
 
+<!-- MODAL DE FILTROS Y ORDENAMIENTO -->
+<div class="modal fade" id="filtroModal" tabindex="-1" aria-labelledby="filtroModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="filtroModalLabel">
+          <i class="bi bi-funnel me-2"></i>Filtrar y Ordenar Productos
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-4">
+          <!-- FILTROS POR ESTADO -->
+          <div class="col-md-6">
+            <h6 class="fw-bold text-dark mb-3">
+              <i class="bi bi-filter-circle me-2 text-primary"></i>Filtrar por Estado
+            </h6>
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="radio" name="filtroEstado" id="todosEstados" value="all" checked>
+              <label class="form-check-label fw-medium" for="todosEstados">
+                Todos los productos
+              </label>
+            </div>
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="radio" name="filtroEstado" id="soloDestacados" value="featured">
+              <label class="form-check-label fw-medium" for="soloDestacados">
+                Solo productos destacados
+              </label>
+            </div>
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="radio" name="filtroEstado" id="stockBajo" value="low-stock">
+              <label class="form-check-label fw-medium" for="stockBajo">
+                Stock bajo (menos de 3 unidades)
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="filtroEstado" id="sinStock" value="no-stock">
+              <label class="form-check-label fw-medium" for="sinStock">
+                Sin stock
+              </label>
+            </div>
+          </div>
+
+          <!-- FILTROS POR CATEGORÍA -->
+          <div class="col-md-6">
+            <h6 class="fw-bold text-dark mb-3">
+              <i class="bi bi-tags me-2 text-primary"></i>Filtrar por Categoría
+            </h6>
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="radio" name="filtroCategoria" id="todasCategorias" value="all" checked>
+              <label class="form-check-label fw-medium" for="todasCategorias">
+                Todas las categorías
+              </label>
+            </div>
+            {% for categoria in categorias %}
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="radio" name="filtroCategoria" id="categoria{{ categoria.id }}" value="{{ categoria.nombre.lower() }}">
+              <label class="form-check-label fw-medium" for="categoria{{ categoria.id }}">
+                {{ categoria.nombre }}
+              </label>
+            </div>
+            {% endfor %}
+          </div>
+
+          <!-- ORDENAMIENTO -->
+          <div class="col-12">
+            <h6 class="fw-bold text-dark mb-3">
+              <i class="bi bi-sort-down me-2 text-primary"></i>Ordenar por
+            </h6>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="form-check mb-2">
+                  <input class="form-check-input" type="radio" name="ordenamiento" id="ordenNombre" value="name" checked>
+                  <label class="form-check-label fw-medium" for="ordenNombre">
+                    Nombre (A-Z)
+                  </label>
+                </div>
+                <div class="form-check mb-2">
+                  <input class="form-check-input" type="radio" name="ordenamiento" id="ordenPrecio" value="price">
+                  <label class="form-check-label fw-medium" for="ordenPrecio">
+                    Precio (Menor a Mayor)
+                  </label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-check mb-2">
+                  <input class="form-check-input" type="radio" name="ordenamiento" id="ordenStock" value="stock">
+                  <label class="form-check-label fw-medium" for="ordenStock">
+                    Stock (Mayor a Menor)
+                  </label>
+                </div>
+                <div class="form-check mb-2">
+                  <input class="form-check-input" type="radio" name="ordenamiento" id="ordenRecientes" value="recent">
+                  <label class="form-check-label fw-medium" for="ordenRecientes">
+                    Más recientes primero
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RANGO DE PRECIOS -->
+          <div class="col-12">
+            <h6 class="fw-bold text-dark mb-3">
+              <i class="bi bi-currency-dollar me-2 text-primary"></i>Rango de Precios
+            </h6>
+            <div class="row align-items-center">
+              <div class="col-md-5">
+                <label class="form-label small text-muted">Precio mínimo</label>
+                <input type="number" class="form-control" id="precioMin" placeholder="0.00" min="0">
+              </div>
+              <div class="col-md-2 text-center">
+                <span class="text-muted">a</span>
+              </div>
+              <div class="col-md-5">
+                <label class="form-label small text-muted">Precio máximo</label>
+                <input type="number" class="form-control" id="precioMax" placeholder="1000.00" min="0">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" id="limpiarFiltrosModal">
+          <i class="bi bi-arrow-clockwise me-2"></i>Limpiar Todo
+        </button>
+        <button type="button" class="btn btn-primary" id="aplicarFiltros">
+          <i class="bi bi-check-lg me-2"></i>Aplicar Filtros
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL DE CATEGORÍAS MEJORADO -->
 <div class="modal fade" id="modalCategorias" tabindex="-1" aria-labelledby="modalCategoriasLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -360,74 +484,185 @@
 document.addEventListener('DOMContentLoaded', () => {
   const searchInput = document.getElementById('searchInput');
   const productRows = document.querySelectorAll('.product-row');
-  let currentFilter = 'all';
-  let currentSort = 'name';
+  const contadorProductos = document.getElementById('contadorProductos');
+  const productosFiltrados = document.getElementById('productosFiltrados');
+  const limpiarFiltrosBtn = document.getElementById('limpiarFiltros');
+  const limpiarFiltrosModalBtn = document.getElementById('limpiarFiltrosModal');
+  const aplicarFiltrosBtn = document.getElementById('aplicarFiltros');
+  
+  let filtrosActuales = {
+    texto: '',
+    estado: 'all',
+    categoria: 'all',
+    orden: 'name',
+    precioMin: null,
+    precioMax: null
+  };
 
   // Búsqueda en tiempo real
   searchInput.addEventListener('input', () => {
-    const filter = searchInput.value.toLowerCase();
-    filterProducts(filter, currentFilter);
+    filtrosActuales.texto = searchInput.value.toLowerCase();
+    aplicarFiltros();
   });
 
-  // Filtros
-  document.querySelectorAll('.filter-option').forEach(option => {
-    option.addEventListener('click', (e) => {
-      e.preventDefault();
-      currentFilter = option.dataset.filter;
-      filterProducts(searchInput.value.toLowerCase(), currentFilter);
-    });
+  // Aplicar filtros desde el modal
+  aplicarFiltrosBtn.addEventListener('click', () => {
+    // Obtener valores del modal
+    const filtroEstado = document.querySelector('input[name="filtroEstado"]:checked').value;
+    const filtroCategoria = document.querySelector('input[name="filtroCategoria"]:checked').value;
+    const ordenamiento = document.querySelector('input[name="ordenamiento"]:checked').value;
+    const precioMin = document.getElementById('precioMin').value;
+    const precioMax = document.getElementById('precioMax').value;
+
+    // Actualizar filtros
+    filtrosActuales.estado = filtroEstado;
+    filtrosActuales.categoria = filtroCategoria;
+    filtrosActuales.orden = ordenamiento;
+    filtrosActuales.precioMin = precioMin ? parseFloat(precioMin) : null;
+    filtrosActuales.precioMax = precioMax ? parseFloat(precioMax) : null;
+
+    // Cerrar modal y aplicar filtros
+    const modal = bootstrap.Modal.getInstance(document.getElementById('filtroModal'));
+    modal.hide();
+    aplicarFiltros();
   });
 
-  // Ordenamiento
-  document.querySelectorAll('.sort-option').forEach(option => {
-    option.addEventListener('click', (e) => {
-      e.preventDefault();
-      currentSort = option.dataset.sort;
-      sortProducts(currentSort);
-    });
+  // Limpiar todos los filtros (botón principal)
+  limpiarFiltrosBtn.addEventListener('click', () => {
+    limpiarFiltros();
   });
 
-  function filterProducts(textFilter, typeFilter) {
+  // Limpiar filtros desde el modal
+  limpiarFiltrosModalBtn.addEventListener('click', () => {
+    // Restablecer controles del modal
+    document.getElementById('todosEstados').checked = true;
+    document.getElementById('todasCategorias').checked = true;
+    document.getElementById('ordenNombre').checked = true;
+    document.getElementById('precioMin').value = '';
+    document.getElementById('precioMax').value = '';
+    
+    // Aplicar limpieza
+    limpiarFiltros();
+  });
+
+  function limpiarFiltros() {
+    // Limpiar búsqueda
+    searchInput.value = '';
+    
+    // Restablecer filtros
+    filtrosActuales = {
+      texto: '',
+      estado: 'all',
+      categoria: 'all',
+      orden: 'name',
+      precioMin: null,
+      precioMax: null
+    };
+    
+    aplicarFiltros();
+  }
+
+  function aplicarFiltros() {
+    let productosVisibles = 0;
+    const filasVisibles = [];
+    
     productRows.forEach(row => {
       const name = row.dataset.name;
       const category = row.dataset.category;
       const featured = row.dataset.featured;
       const stock = parseInt(row.dataset.stock);
+      const price = parseFloat(row.dataset.price);
+      const status = row.dataset.status;
       
-      const textMatch = name.includes(textFilter) || category.includes(textFilter);
-      let typeMatch = true;
+      // Aplicar filtro de texto
+      const textoMatch = name.includes(filtrosActuales.texto) || 
+                         category.includes(filtrosActuales.texto);
       
-      switch(typeFilter) {
-        case 'featured': typeMatch = featured === 'true'; break;
-        case 'low-stock': typeMatch = stock < 3 && stock > 0; break;
-        case 'no-stock': typeMatch = stock === 0; break;
+      // Aplicar filtro de estado
+      let estadoMatch = true;
+      switch(filtrosActuales.estado) {
+        case 'featured': estadoMatch = featured === 'true'; break;
+        case 'low-stock': estadoMatch = stock < 3 && stock > 0; break;
+        case 'no-stock': estadoMatch = stock === 0; break;
       }
       
-      row.style.display = (textMatch && typeMatch) ? '' : 'none';
+      // Aplicar filtro de categoría
+      const categoriaMatch = filtrosActuales.categoria === 'all' || 
+                             category === filtrosActuales.categoria;
+      
+      // Aplicar filtro de precio
+      let precioMatch = true;
+      if (filtrosActuales.precioMin !== null) {
+        precioMatch = precioMatch && price >= filtrosActuales.precioMin;
+      }
+      if (filtrosActuales.precioMax !== null) {
+        precioMatch = precioMatch && price <= filtrosActuales.precioMax;
+      }
+      
+      // Mostrar u ocultar fila según los filtros
+      const mostrarFila = textoMatch && estadoMatch && categoriaMatch && precioMatch;
+      row.style.display = mostrarFila ? '' : 'none';
+      
+      if (mostrarFila) {
+        productosVisibles++;
+        filasVisibles.push(row);
+      }
     });
+    
+    // Ordenar filas visibles
+    ordenarFilas(filasVisibles);
+    
+    // Actualizar contadores
+    actualizarContadores(productosVisibles);
   }
 
-  function sortProducts(sortBy) {
+  function ordenarFilas(filas) {
     const tbody = document.querySelector('#productTable tbody');
-    const rows = Array.from(productRows).filter(row => row.style.display !== 'none');
     
-    rows.sort((a, b) => {
-      switch(sortBy) {
+    filas.sort((a, b) => {
+      switch(filtrosActuales.orden) {
         case 'name':
           return a.dataset.name.localeCompare(b.dataset.name);
         case 'price':
-          return parseFloat(a.cells[1].textContent.replace('$', '')) - parseFloat(b.cells[1].textContent.replace('$', ''));
+          return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
         case 'stock':
           return parseInt(b.dataset.stock) - parseInt(a.dataset.stock);
         case 'recent':
-          return 0; // Aquí podrías ordenar por fecha de creación
+          // Por defecto, ordenar por ID (simulando más recientes)
+          return parseInt(b.dataset.id) - parseInt(a.dataset.id);
         default:
           return 0;
       }
     });
     
     // Reordenar las filas en la tabla
-    rows.forEach(row => tbody.appendChild(row));
+    filas.forEach(row => tbody.appendChild(row));
+  }
+
+  function actualizarContadores(cantidad) {
+    const texto = cantidad === 1 ? 'producto' : 'productos';
+    contadorProductos.textContent = `${cantidad} ${texto}`;
+    productosFiltrados.textContent = `${cantidad} ${texto}`;
+    
+    // Cambiar color del badge si hay filtros activos
+    const hayFiltrosActivos = 
+      filtrosActuales.texto !== '' || 
+      filtrosActuales.estado !== 'all' || 
+      filtrosActuales.categoria !== 'all' || 
+      filtrosActuales.precioMin !== null || 
+      filtrosActuales.precioMax !== null;
+    
+    if (hayFiltrosActivos) {
+      contadorProductos.classList.remove('bg-primary');
+      contadorProductos.classList.add('bg-success');
+      productosFiltrados.classList.remove('bg-primary');
+      productosFiltrados.classList.add('bg-success');
+    } else {
+      contadorProductos.classList.remove('bg-success');
+      contadorProductos.classList.add('bg-primary');
+      productosFiltrados.classList.remove('bg-success');
+      productosFiltrados.classList.add('bg-primary');
+    }
   }
 
   // Tooltips
@@ -480,6 +715,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   .bg-opacity-10 {
     background-opacity: 0.1 !important;
+  }
+
+  /* Estilos para el modal de filtros */
+  .modal-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .form-check-input:checked {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+  }
+  
+  .form-check-label {
+    cursor: pointer;
   }
 </style>
 {% endblock %}
